@@ -43,25 +43,36 @@ def initialize_model():
     if model is None:
         if MODEL_URL:
             print("🔄 API Starting: Downloading model from URL...")
-            download_model(MODEL_URL, LOCAL_MODEL_PATH)
-            print("🔄 Loading model...")
-            model = load_model(LOCAL_MODEL_PATH)
-            print("✅ Model loaded successfully from URL!")
-            print("💡 Model is now ready and cached in memory!")
+            try:
+                download_model(MODEL_URL, LOCAL_MODEL_PATH)
+                print("🔄 Loading model...")
+                model = load_model(LOCAL_MODEL_PATH)
+                print("✅ Model loaded successfully from URL!")
+                print("💡 Model is now ready and cached in memory!")
+            except Exception as e:
+                print(f"❌ Error loading model from URL: {e}")
+                print("⚠️  Model initialization failed. Some features may not work.")
+                model = None
         else:
-            print("🔄 API Starting: Using local model...")
-            # Use relative path that works in any environment
-            local_path = "api/model/plantmodelsetdieses.keras"
-            model = load_model(local_path)
-            print("✅ Local model loaded successfully!")
-            print("💡 Model is now ready and cached in memory!")
+            print("⚠️  No MODEL_URL provided. Model will be downloaded on first use.")
+            print("💡 Set MODEL_URL environment variable for faster startup.")
     return model
 
 def get_model():
-    """Get the already initialized model"""
+    """Get the model, downloading if needed"""
     global model
     if model is None:
-        raise Exception("Model not initialized! Call initialize_model() first.")
+        if MODEL_URL:
+            print("🔄 Model not loaded, downloading from URL...")
+            try:
+                download_model(MODEL_URL, LOCAL_MODEL_PATH)
+                model = load_model(LOCAL_MODEL_PATH)
+                print("✅ Model loaded successfully!")
+            except Exception as e:
+                print(f"❌ Error loading model: {e}")
+                raise Exception(f"Failed to load model: {e}")
+        else:
+            raise Exception("No MODEL_URL provided and no local model available. Please set MODEL_URL environment variable.")
     return model
 
 
