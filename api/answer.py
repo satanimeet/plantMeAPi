@@ -1,20 +1,28 @@
 import numpy as np
-from .outsideapi import supabase,openai
+from .outsideapi import supabase, openai, get_supabase_client, get_openai_client
 import ast
 
 
 client = openai
 
-question = "what is sanitation of this disease"
-plant_disease = "AppleScab"
+
 
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def genral_answer(question: str):
+    # Validate input
+    if not question or question.strip() == "":
+        return "Please provide a valid question."
+    
+    # Get Supabase client
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        return "Database service is currently unavailable. Please try again later."
+    
     disease_name = "chatbotintro"
     # Fetch documents from Supabase
-    response = supabase.table("documents").select("context, embedding_context")\
+    response = supabase_client.table("documents").select("context, embedding_context")\
         .eq("disease_name",disease_name).execute()
     chunks = response.data
 
@@ -64,8 +72,13 @@ def genral_answer(question: str):
     Answer clearly and concisely:
     """
 
+    # Get OpenAI client
+    openai_client = get_openai_client()
+    if not openai_client:
+        return "AI service is currently unavailable. Please try again later."
+    
     # Generate answer
-    answer = openai.chat.completions.create(
+    answer = openai_client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7,
@@ -81,8 +94,17 @@ def genral_answer(question: str):
 
 
 def get_answer(question: str, disease_name: str ):
+    # Validate input
+    if not question or question.strip() == "":
+        return "Please provide a valid question."
+    
+    # Get Supabase client
+    supabase_client = get_supabase_client()
+    if not supabase_client:
+        return "Database service is currently unavailable. Please try again later."
+    
     # Fetch documents from Supabase
-    response = supabase.table("documents").select("context, embedding_context")\
+    response = supabase_client.table("documents").select("context, embedding_context")\
         .eq("disease_name",disease_name).execute()
     chunks = response.data
 
@@ -133,8 +155,13 @@ def get_answer(question: str, disease_name: str ):
     Answer clearly and concisely:
     """
 
+    # Get OpenAI client
+    openai_client = get_openai_client()
+    if not openai_client:
+        return "AI service is currently unavailable. Please try again later."
+    
     # Generate answer
-    answer = openai.chat.completions.create(
+    answer = openai_client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[{"role": "user", "content": prompt}],
         temperature=0.7,

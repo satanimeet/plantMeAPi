@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form,Query,Body
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
-from .outsideapi import supabase,openai
+from .outsideapi import supabase, openai, get_supabase_client, get_openai_client
 from tensorflow.keras.models import load_model
 from .answer import get_answer,genral_answer
 from .receivequery import audio_text_convert, audio_text_convert_file
@@ -167,11 +167,15 @@ async def upload_document(
         chunks = chunk_text(text)
 
         # Step 3: Generate embeddings and store in DB
+        supabase_client = get_supabase_client()
+        if not supabase_client:
+            return {"status": "error", "message": "Database service is currently unavailable. Please try again later."}
+        
         for chunk in chunks:
             embedding = create_embedding(chunk)
 
             # Store in Supabase
-            supabase.table("documents").insert({
+            supabase_client.table("documents").insert({
                 "disease_name": disease_name,
                 "context": chunk,
                 "embedding_context": embedding
