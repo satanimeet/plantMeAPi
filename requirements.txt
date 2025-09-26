@@ -2,7 +2,7 @@
 tensorflow==2.19.0
 tensorflow-io-gcs-filesystem==0.37.1
 keras==3.9.1
-numpy==2.1.3
+numpy>=1.26.0,<2.0.0
 protobuf==5.29.4
 absl-py==2.2.1
 astunparse==1.6.3
@@ -26,7 +26,7 @@ packaging==24.2
 # Visualization + image processing
 matplotlib==3.10.6
 pillow==11.3.0
-opencv-python==4.12.0.88
+opencv-python>=4.8.0,<5.0.0
 
 # Kaggle dataset utilities
 kaggle==1.7.4.5
