@@ -43,3 +43,7 @@ python-multipart==0.0.6
 
 # Environment and utilities
 python-dotenv==1.0.0
+
+# Database and AI services
+supabase==2.3.4
+openai==1.12.0
