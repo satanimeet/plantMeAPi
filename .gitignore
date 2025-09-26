@@ -63,4 +63,3 @@ tmp/
 # Deployment files
 .deployment
 azure-pipelines.yml
-web.config
