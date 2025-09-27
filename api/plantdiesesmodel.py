@@ -4,7 +4,7 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.layers import Input
-import cv2
+
 from PIL import Image
 import io
 import os
