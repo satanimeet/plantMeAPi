@@ -10,7 +10,7 @@ from .documentvector import extract_text_from_word,chunk_text,create_embedding
 import os
 from PIL import Image
 from io import BytesIO
-import cv2
+
 from .plantdiesesmodel import class_names, confidence_level,preprocess_for_your_model,predict_image,get_model,initialize_model
 import keras
 
