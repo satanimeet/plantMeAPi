@@ -1,33 +1,25 @@
-from supabase import create_client, Client
 import openai
-
 import os
 from dotenv import load_dotenv
+from .database import get_database_engine
 
 # Load environment variables
 load_dotenv()
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+DATABASE_URL = os.getenv("DATABASE_URL")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Initialize clients with error handling
-supabase = None
 openai_client = None
 
-def get_supabase_client():
-    global supabase
-    if supabase is None:
-        if not SUPABASE_URL or not SUPABASE_KEY:
-            print("⚠️  Warning: Supabase credentials not found. Some features may not work.")
-            return None
-        try:
-            supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-            print("✅ Supabase client initialized successfully")
-        except Exception as e:
-            print(f"❌ Error initializing Supabase client: {e}")
-            return None
-    return supabase
+def get_database_client():
+    """Get PostgreSQL database client"""
+    engine = get_database_engine()
+    if engine:
+        print("✅ PostgreSQL database client initialized successfully")
+        return engine
+    else:
+        print("⚠️  Warning: PostgreSQL database not available. Some features may not work.")
+        return None
 
 def get_openai_client():
     global openai_client
@@ -43,6 +35,4 @@ def get_openai_client():
             return None
     return openai_client
 
-# Initialize clients
-supabase = get_supabase_client()
-openai = get_openai_client()
+# Clients will be initialized when first needed

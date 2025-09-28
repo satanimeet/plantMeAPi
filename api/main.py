@@ -2,7 +2,8 @@ from fastapi import FastAPI, UploadFile, File, Form,Query,Body
 from typing import Optional
 from fastapi.middleware.cors import CORSMiddleware
 import numpy as np
-from .outsideapi import supabase, openai, get_supabase_client, get_openai_client
+from .outsideapi import openai, get_database_client, get_openai_client
+from .database import insert_data
 from tensorflow.keras.models import load_model
 from .answer import get_answer,genral_answer
 from .receivequery import audio_text_convert, audio_text_convert_file
@@ -167,19 +168,19 @@ async def upload_document(
         chunks = chunk_text(text)
 
         # Step 3: Generate embeddings and store in DB
-        supabase_client = get_supabase_client()
-        if not supabase_client:
+        engine = get_database_client()
+        if not engine:
             return {"status": "error", "message": "Database service is currently unavailable. Please try again later."}
         
         for chunk in chunks:
             embedding = create_embedding(chunk)
 
-            # Store in Supabase
-            supabase_client.table("documents").insert({
+            # Store in PostgreSQL
+            insert_data("documents", {
                 "disease_name": disease_name,
                 "context": chunk,
                 "embedding_context": embedding
-            }).execute()
+            })
 
         return {"status": "success", "chunks_stored": len(chunks)}
 
@@ -214,7 +215,9 @@ async def queastionAnswer(
         
     else:
         text = queastion
-        
+
+    # Store the original disease_name parameter
+    original_disease_name = disease_name
     
     # Check if text is empty or None
     
@@ -237,7 +240,9 @@ async def queastionAnswer(
         if uid:
             user_state[uid] = {"disease": predicted_disease}
 
-        disease_name = predicted_disease
+        # Use predicted disease from photo, but only if no disease_name was provided
+        if not original_disease_name:
+            disease_name = predicted_disease
 
         if confidence >= 0.6:
             full_name = class_name_mapping.get(predicted_disease, predicted_disease)
@@ -255,10 +260,10 @@ async def queastionAnswer(
                 "message": "It doesn’t look like a plant photo. Can you re-upload it?"
             }
     else:
-        # if no photo, try to reuse stored disease
-        if uid and uid in user_state and user_state[uid].get("disease"):
+        # if no photo, use provided disease_name or try to reuse stored disease
+        if not original_disease_name and uid and uid in user_state and user_state[uid].get("disease"):
             disease_name = user_state[uid]["disease"]
-        else:
+        elif not original_disease_name:
             disease_name = None
 
     if disease_name is None:

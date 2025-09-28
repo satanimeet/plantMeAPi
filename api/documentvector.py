@@ -7,7 +7,7 @@ import numpy as np
 from langchain.text_splitter import CharacterTextSplitter,RecursiveCharacterTextSplitter  
 
 from openai import OpenAI
-from .outsideapi import supabase,openai
+from .outsideapi import openai
 
 # Initialize FastAPI
 

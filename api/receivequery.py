@@ -1,5 +1,5 @@
-from supabase import create_client, Client
-from .outsideapi import openai
+from .outsideapi import openai, get_database_client
+from .database import insert_data
 import uuid
 import tempfile
 import os
@@ -69,18 +69,9 @@ def photo_url_convert(file_path: str, user_id: str) -> str:
     storage_path = f"user_uploads/{user_id}/{file_name}"
 
 
-    # Upload original file to Supabase
-    result = supabase.storage.from_("images").upload(
-        storage_path,
-        open(file_path, "rb")
-    )
-
-    if result.get("error"):
-        print("Upload error:", result["error"])
-        return ""
-
-    public_url = supabase.storage.from_("images").get_public_url(storage_path)
-    return public_url["publicUrl"]
+    # For PostgreSQL, we'll store the file path instead of uploading to cloud storage
+    # You can implement file storage logic here (e.g., save to local storage, AWS S3, etc.)
+    return f"/uploads/{storage_path}"
 
 
 
@@ -94,14 +85,15 @@ def add_qa(uid, question, answer, photo_url=None,predicted_disease=None):
         input=text
     ).data[0].embedding
 
-    supabase.table("qa").insert({
+    # Store in PostgreSQL
+    insert_data("qa", {
         "uid": uid,
         "question": question,
         "answer": answer,
         "photo_url": photo_url,
         "predicted_disease": predicted_disease,
         "embedding": embedding
-    }).execute()
+    })
 
 
 def add_document(content, metadata=None):
@@ -111,11 +103,12 @@ def add_document(content, metadata=None):
         input=content
     ).data[0].embedding
 
-    supabase.table("documents").insert({
+    # Store in PostgreSQL
+    insert_data("documents", {
         "content": content,
         "metadata": metadata or {},
         "embedding": embedding
-    }).execute()
+    })
 
 
 
