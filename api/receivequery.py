@@ -62,6 +62,22 @@ def audio_text_convert(audio_url: str) -> str:
     except Exception as e:
         print("Error converting audio:", e)
 
+def extract_mfcc(audio_path):
+    # Load audio file
+    y, sr = librosa.load(audio_path, sr=None)
+    
+    # Extract MFCCs
+    mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+    
+    # Plot MFCC
+    plt.figure(figsize=(10, 6))
+    librosa.display.specshow(mfcc, x_axis='time', sr=sr)
+    plt.colorbar()
+    plt.title('MFCC')
+    plt.show()
+    
+    return mfcc
+
 
 
 def photo_url_convert(file_path: str, user_id: str) -> str:
