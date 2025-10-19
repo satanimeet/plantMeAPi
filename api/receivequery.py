@@ -85,8 +85,7 @@ def photo_url_convert(file_path: str, user_id: str) -> str:
     storage_path = f"user_uploads/{user_id}/{file_name}"
 
 
-    # For PostgreSQL, we'll store the file path instead of uploading to cloud storage
-    # You can implement file storage logic here (e.g., save to local storage, AWS S3, etc.)
+    
     return f"/uploads/{storage_path}"
 
 
